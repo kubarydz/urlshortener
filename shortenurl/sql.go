@@ -1,14 +1,11 @@
 package shortenurl
 
 import (
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
+	"github.com/redis/go-redis/v9"
 )
 
-func Connect() (*gorm.DB, error) {
-	db, err := gorm.Open(sqlite.Open("urls.db"), &gorm.Config{})
-	if err != nil {
-		return nil, err
-	}
-	return db, nil
+func Connect() *redis.Client {
+	return redis.NewClient(&redis.Options{
+		Addr: "localhost:6379",
+	})
 }

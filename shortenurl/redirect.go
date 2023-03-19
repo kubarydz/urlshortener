@@ -3,7 +3,7 @@ package shortenurl
 import (
 	"net/http"
 
-	"gorm.io/gorm"
+	"github.com/redis/go-redis/v9"
 )
 
 type URL struct {
@@ -12,10 +12,12 @@ type URL struct {
 	Shortened string `gorm:"not null"`
 }
 
-func RedirectURL(db *gorm.DB, w http.ResponseWriter, r *http.Request) {
+func RedirectURL(db *redis.Client, w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Path[1:]
-	var url URL
 	short := "http://localhost:8080/" + id
-	db.First(&url, "shortened = ?", short)
-	http.Redirect(w, r, url.Original, http.StatusFound)
+	original, err := db.Get(r.Context(), short).Result()
+	if err != nil {
+		panic(err) //TODO
+	}
+	http.Redirect(w, r, original, http.StatusFound)
 }

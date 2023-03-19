@@ -8,18 +8,14 @@ import (
 )
 
 func main() {
-	db, err := shortenurl.Connect()
-	if err != nil {
-		panic("failed to connect to db")
-	}
-	db.AutoMigrate(&shortenurl.URL{})
+	db := shortenurl.Connect()
 
 	http.HandleFunc("/shorten", func(w http.ResponseWriter, r *http.Request) {
 		original := r.FormValue("url")
 		shortened := shortenurl.ShortenUrl(original)
-		fmt.Printf(shortened)
+		fmt.Println(shortened)
 
-		db.Create(&shortenurl.URL{Original: original, Shortened: shortened})
+		db.Set(r.Context(), shortened, original, 0)
 	})
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
