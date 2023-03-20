@@ -1,25 +1,17 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
+	"log"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/kubarydz/urlshortener/shortenurl"
 )
 
 func main() {
-	db := shortenurl.Connect()
 
-	http.HandleFunc("/shorten", func(w http.ResponseWriter, r *http.Request) {
-		original := r.FormValue("url")
-		shortened := shortenurl.ShortenUrl(original)
-		fmt.Println(shortened)
+	app := fiber.New()
+	app.Post("/shorten", shortenurl.Shorten)
+	app.Get("/:url", shortenurl.RedirectURL)
 
-		db.Set(r.Context(), shortened, original, 0)
-	})
-
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		shortenurl.RedirectURL(db, w, r)
-	})
-	http.ListenAndServe(":8080", nil)
+	log.Fatal(app.Listen(":3000"), 301)
 }
