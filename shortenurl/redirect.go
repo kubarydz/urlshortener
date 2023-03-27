@@ -17,7 +17,7 @@ func RedirectURL(c *fiber.Ctx) error {
 
 	originalUrl, err := db.Get(c.Context(), url).Result()
 	if err != nil {
-		panic(err)
+		return fiber.ErrNotFound
 	}
 
 	return c.Redirect(originalUrl)

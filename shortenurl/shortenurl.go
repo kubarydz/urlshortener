@@ -34,7 +34,7 @@ func Shorten(c *fiber.Ctx) error {
 	body := shortenRequest{}
 	err := c.BodyParser(&body)
 	if err != nil {
-		return err //TODO
+		return fiber.ErrBadRequest
 	}
 	db := Connect()
 	defer db.Close()
@@ -53,7 +53,7 @@ func Shorten(c *fiber.Ctx) error {
 	if shortUrl != "" {
 		result, err := db.Get(c.Context(), shortUrl).Result()
 		if err == nil && result != "" {
-			panic(err) //TODO
+			return fiber.NewError(fiber.ErrBadRequest.Code, "request short url already exists")
 		}
 		custom = true
 	} else {
@@ -61,13 +61,11 @@ func Shorten(c *fiber.Ctx) error {
 	}
 
 	// temporary: save only for 24h
-	if custom {
-		db.Set(c.Context(), shortUrl, body.Original, time.Hour*24)
-	} else {
+	if !custom {
 		for i := 0; i < 20; i++ {
 			exists, err := db.Exists(c.Context(), shortUrl).Result()
 			if err != nil {
-				panic(err) //TODO
+				return err
 			}
 			if exists == 0 {
 				break
