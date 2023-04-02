@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  db:
+    image: redis:alpine
+    ports: 
+      - 6379:6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+
+  shortener:
+    build: ./
+    ports: 
+      - 3000:3000
+    depends_on:
+      db:
+        condition: service_healthy
+    
