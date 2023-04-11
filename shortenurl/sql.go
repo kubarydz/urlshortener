@@ -6,6 +6,6 @@ import (
 
 func Connect() *redis.Client {
 	return redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr: "db:6379",
 	})
 }
